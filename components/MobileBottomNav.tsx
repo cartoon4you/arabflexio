@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Home, Film, Tv, Bookmark, LogIn, User } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,8 @@ import { useIsMounted } from '@/hooks/use-mounted';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type');
   const { watchlist } = useWatchlist();
   const { currentUser, signInWithGoogle } = useAuth();
   const mounted = useIsMounted();
@@ -39,14 +41,14 @@ export default function MobileBottomNav() {
       label: 'الأفلام',
       href: '/catalog?type=movie',
       icon: Film,
-      isActive: pathname === '/catalog' && typeof window !== 'undefined' && window.location.search.includes('type=movie'),
+      isActive: pathname === '/catalog' && type === 'movie',
     },
     {
       id: 'bottom-nav-series',
       label: 'المسلسلات',
       href: '/catalog?type=series',
       icon: Tv,
-      isActive: pathname === '/catalog' && typeof window !== 'undefined' && window.location.search.includes('type=series'),
+      isActive: pathname === '/catalog' && type === 'series',
     },
     {
       id: 'bottom-nav-watchlist',

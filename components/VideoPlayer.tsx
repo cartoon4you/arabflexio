@@ -37,7 +37,7 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
     // دالة لتوجيه الروابط الخارجية عبر الوسيط لتجاوز الحماية
     const getProxiedUrl = (url: string) => {
       if (url.startsWith('http')) {
-        return `/api/stream?url=${encodeURIComponent(url)}`;
+        return `/api/proxy/video?url=${encodeURIComponent(url)}`;
       }
       return url;
     };
@@ -151,7 +151,7 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
       <div
         ref={containerRef}
         onMouseMove={() => setShowControls(true)}
-        className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 group select-none"
+        className={`relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 group select-none ${isLoading ? 'animate-pulse' : ''}`}
       >
         <video
           ref={videoRef}
@@ -164,7 +164,7 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
           }}
           onClick={togglePlay}
           onError={handleVideoError}
-          referrerPolicy="no-referrer"
+          {...({ referrerPolicy: 'no-referrer' } as any)}
           className="w-full h-full object-contain cursor-pointer"
           playsInline
         />
@@ -200,8 +200,10 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
             showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         >
+          {/* إضافة dir="ltr" لجعل شريط التمرير من اليسار لليمين */}
           <input
             type="range"
+            dir="ltr"
             min={0}
             max={duration || 100}
             value={currentTime}
@@ -225,8 +227,10 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
                 <button onClick={toggleMute} className="p-1 hover:text-amber-400">
                   {isMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5" />}
                 </button>
+                {/* إضافة dir="ltr" لشريط الصوت */}
                 <input
                   type="range"
+                  dir="ltr"
                   min={0}
                   max={1}
                   step={0.05}
@@ -236,13 +240,13 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
                 />
               </div>
 
-              <span className="text-zinc-400 font-mono text-[11px]">
+              <span className="text-zinc-400 font-mono text-[11px]" dir="ltr">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-zinc-400 hidden md:inline text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-800">
+              <span className="text-zinc-400 hidden md:inline text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-800" dir="ltr">
                 {activeServer?.quality || 1080}p
               </span>
               <button onClick={toggleFullscreen} className="p-1 hover:text-amber-400" title="شاشة كاملة">

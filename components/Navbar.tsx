@@ -7,12 +7,14 @@ import { Search, Film, Tv, Bookmark, Compass, LogIn, LogOut, Download, Sparkles 
 import { useAuth } from '@/contexts/AuthContext';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { PWAInstallButton } from '@/components/PWAInstallButton';
+import { useIsMounted } from '@/hooks/use-mounted';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { currentUser, signInWithGoogle, logout } = useAuth();
   const { watchlist } = useWatchlist();
+  const mounted = useIsMounted();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -97,7 +99,7 @@ export function Navbar() {
             title="قائمتي"
           >
             <Bookmark className="w-5 h-5" />
-            {watchlist.length > 0 && (
+            {mounted && watchlist.length > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-amber-500 text-black text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                 {watchlist.length}
               </span>

@@ -3,13 +3,10 @@
 import { useEffect, useState } from 'react';
 
 export function useOnlineStatus(): boolean {
-  const [isOnline, setIsOnline] = useState<boolean>(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
+    queueMicrotask(() => setIsOnline(navigator.onLine));
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
