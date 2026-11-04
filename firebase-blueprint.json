@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "media_cache": {
+      "fields": {
+        "key": { "type": "string" },
+        "data": { "type": "string" },
+        "expiresAt": { "type": "number" },
+        "staleUntil": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "users": {
+      "fields": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "subcollections": {
+        "watchlist": {
+          "fields": {
+            "id": { "type": "string" },
+            "title": { "type": "string" },
+            "poster": { "type": "string" },
+            "rating": { "type": "string" },
+            "year": { "type": "string" },
+            "type": { "type": "string" },
+            "userId": { "type": "string" },
+            "addedAt": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
