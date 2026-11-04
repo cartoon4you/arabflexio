@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Hls from 'hls.js';
 import { ServerOption } from '@/lib/types';
-import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, Server } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, Server, AlertCircle } from 'lucide-react';
 
 interface VideoPlayerProps {
   servers: ServerOption[];
@@ -22,6 +22,7 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
 
   const activeServer = servers[currentServerIndex] || servers[0];
 
@@ -30,23 +31,38 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
     if (!video || !activeServer?.url) return;
 
     setIsLoading(true);
+    setVideoError(false);
     let hls: Hls | null = null;
+
+    // دالة لتوجيه الروابط الخارجية عبر الوسيط لتجاوز الحماية
+    const getProxiedUrl = (url: string) => {
+      if (url.startsWith('http')) {
+        return `/api/stream?url=${encodeURIComponent(url)}`;
+      }
+      return url;
+    };
+
+    const finalUrl = getProxiedUrl(activeServer.url);
 
     if (activeServer.url.endsWith('.m3u8') && Hls.isSupported()) {
       hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
       });
-      hls.loadSource(activeServer.url);
+      hls.loadSource(finalUrl);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         setIsLoading(false);
       });
-      hls.on(Hls.Events.ERROR, () => {
+      hls.on(Hls.Events.ERROR, (event, data) => {
         setIsLoading(false);
+        if (data.fatal) {
+          console.error("HLS Error:", data);
+          setVideoError(true);
+        }
       });
     } else {
-      video.src = activeServer.url;
+      video.src = finalUrl;
       const handleCanPlay = () => setIsLoading(false);
       video.addEventListener('canplay', handleCanPlay);
       return () => {
@@ -121,6 +137,15 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const handleVideoError = () => {
+    setVideoError(true);
+    setIsLoading(false);
+    const video = videoRef.current;
+    if (video && video.error) {
+      console.error(`Video Error: code=${video.error.code}`, video.error.message);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div
@@ -138,17 +163,29 @@ export function VideoPlayer({ servers, title }: VideoPlayerProps) {
             setIsPlaying(true);
           }}
           onClick={togglePlay}
+          onError={handleVideoError}
+          referrerPolicy="no-referrer"
           className="w-full h-full object-contain cursor-pointer"
           playsInline
         />
 
-        {isLoading && (
+        {isLoading && !videoError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs pointer-events-none">
             <div className="w-12 h-12 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
           </div>
         )}
 
-        {!isPlaying && !isLoading && (
+        {videoError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm text-center p-4">
+            <AlertCircle className="w-12 h-12 text-red-500 mb-3" />
+            <p className="text-white font-bold mb-1">تعذر تشغيل الفيديو</p>
+            <p className="text-zinc-400 text-xs max-w-md">
+              قد يكون الرابط منتهي الصلاحية، أو أن السيرفر يرفض الاتصال. جرب تبديل السيرفر من القائمة بالأسفل أو قم بتحديث الصفحة.
+            </p>
+          </div>
+        )}
+
+        {!isPlaying && !isLoading && !videoError && (
           <button
             onClick={togglePlay}
             className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-xl shadow-amber-500/40 hover:scale-110 transition-transform"
