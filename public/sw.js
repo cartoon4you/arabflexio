@@ -61,10 +61,13 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => {
+        .catch(async () => {
           if (request.mode === 'navigate') {
-            return caches.match('/offline') || caches.match('/');
+            const offline = await caches.match('/offline');
+            if (offline) return offline;
+            return caches.match('/');
           }
+          return new Response(null, { status: 404 });
         });
 
       return cachedResponse || fetchPromise;

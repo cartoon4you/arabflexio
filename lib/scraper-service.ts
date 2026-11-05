@@ -629,7 +629,14 @@ export async function getMediaDetails(id: string): Promise<MediaItem | null> {
   try {
     const detailUrl = normalizeUrl(`${BASE_URL}/${decodedPath.replace(/^\/+/, '')}`);
     const $ = await fetchHTML(detailUrl, STANDARD_TIMEOUT_MS);
-    if (!$) return null;
+    if (!$) {
+      console.warn(`[Diagnostic] Failed to fetch HTML for: ${detailUrl}`);
+      return null;
+    }
+    
+    // Log a snippet of the HTML for diagnostic purposes
+    const htmlSnippet = $.html().substring(0, 1000);
+    console.log(`[Diagnostic] Scraped HTML snippet for ${detailUrl}:`, htmlSnippet);
 
     const title = $('h1.entry-title, .movie-title, .title').first().text().trim() || 'مشاهدة العمل';
     const imgEl = $('.poster img, .entry-image img, picture img').first();

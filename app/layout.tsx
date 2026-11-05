@@ -16,7 +16,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'ArabFlex - سينما وأفلام ومسلسلات عربية وعالمية',
   description: 'منصة ArabFlex لمشاهدة وتحميل أحدث الأفلام والمسلسلات العربية والتركية والأجنبية والأنمي بجودة عالية وسيرفرات مباشرة بدون إعلانات مزعجة.',
-  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
